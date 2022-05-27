@@ -1,20 +1,15 @@
-package fastcampus.aop.part3.chapter07
+package fastcampus.aop.part3.chapter07.ui
 
-    import android.content.Context
-    import android.graphics.Color
-    import androidx.appcompat.app.AppCompatActivity
-    import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-    import com.naver.maps.geometry.LatLng
-    import com.naver.maps.map.NaverMap
-    import com.naver.maps.map.overlay.Marker
-    import com.naver.maps.map.util.MarkerIcons
-    import fastcampus.aop.part3.chapter07.api.HouseModel
-    import fastcampus.aop.part3.chapter07.data.repo.Repository
-    import fastcampus.aop.part3.chapter07.ui.activity.MainActivity
+import dagger.hilt.android.lifecycle.HiltViewModel
+import fastcampus.aop.part3.chapter07.data.repo.HouseRepository
+import javax.inject.Inject
 
-class MainViewModel(private val repository: Repository): ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(private val houseRepository: HouseRepository) :
+    ViewModel() {
 
     private val _mainViewStateLiveData = MutableLiveData<MainViewState>()
     val mainViewStateLiveData: LiveData<MainViewState>
@@ -22,7 +17,7 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
 
     fun requestHouseList() {
-        repository.getHouseList(
+        houseRepository.getHouseList(
             onSuccess = { result ->
                 if (result.items.isNotEmpty()) {
                     _mainViewStateLiveData.value = MainViewState.GetHouseList(result)

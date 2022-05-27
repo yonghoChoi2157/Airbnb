@@ -1,4 +1,4 @@
-package fastcampus.aop.part3.chapter07
+package fastcampus.aop.part3.chapter07.ui
 
 import fastcampus.aop.part3.chapter07.api.HouseDto
 

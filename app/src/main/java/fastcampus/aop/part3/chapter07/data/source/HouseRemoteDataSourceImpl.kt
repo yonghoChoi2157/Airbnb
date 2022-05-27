@@ -6,8 +6,10 @@ import fastcampus.aop.part3.chapter07.util.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.inject.Inject
 
-class RemoteDataSourceImpl : RemoteDataSource {
+
+class HouseRemoteDataSourceImpl @Inject constructor() : HouseRemoteDataSource {
 
     private val service = RetrofitClient.create<HouseService>(HouseService.baseUrl)
 

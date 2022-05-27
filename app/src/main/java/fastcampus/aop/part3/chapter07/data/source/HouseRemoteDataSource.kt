@@ -1,8 +1,8 @@
-package fastcampus.aop.part3.chapter07.data.repo
+package fastcampus.aop.part3.chapter07.data.source
 
 import fastcampus.aop.part3.chapter07.api.HouseDto
 
-interface Repository {
+interface HouseRemoteDataSource {
 
     fun getHouseList(
         onSuccess: (HouseDto) -> Unit,

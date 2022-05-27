@@ -20,6 +20,10 @@ class HouseListAdapter : ListAdapter<HouseModel, HouseViewHolder>(differ) {
         holder.bind(currentList[position], onItemClick)
     }
 
+    fun setItemClickListener(listener: (HouseModel) -> Unit) {
+        onItemClick = listener
+    }
+
     companion object {
 
         val differ = object : DiffUtil.ItemCallback<HouseModel>() {
