@@ -25,14 +25,26 @@ import fastcampus.aop.part3.chapter07.ui.adapter.HouseListAdapter
 import fastcampus.aop.part3.chapter07.ui.adapter.HouseViewPagerAdapter
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), OnMapReadyCallback,
-    Overlay.OnClickListener {
+class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), OnMapReadyCallback{
 
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private val mainViewModel by viewModels<MainViewModel>()
     private val recyclerAdapter by lazy { HouseListAdapter() }
     private val viewPagerAdapter by lazy { HouseViewPagerAdapter() }
+
+    private val overlayListener = Overlay.OnClickListener { overly->
+        val selectedModel = viewPagerAdapter.currentList.firstOrNull {
+            it.id == overly.tag
+        }
+
+        selectedModel?.let {
+            val position = viewPagerAdapter.currentList.indexOf(it)
+            binding.houseViewPager.currentItem = position
+        }
+        true
+    }
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
@@ -52,7 +64,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), 
             bottomSheet.recyclerView.adapter = recyclerAdapter
             houseViewPager.adapter = viewPagerAdapter
             mapView.getMapAsync(this@MainActivity)
-
 
             houseViewPager.registerOnPageChangeCallback(object :
                 ViewPager2.OnPageChangeCallback() {
@@ -95,7 +106,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), 
         mainViewModel.mainViewStateLiveData.observe(this) { viewState ->
             when (viewState) {
                 is MainViewState.GetHouseList -> {
-                    updateMarker(viewState.dto.items)
                     viewPagerAdapter.submitList(viewState.dto.items)
                     recyclerAdapter.submitList(viewState.dto.items)
                     binding.bottomSheet.bottomSheetTitleTextView.text =
@@ -103,6 +113,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), 
                 }
                 is MainViewState.Error -> {
                     Toast.makeText(this, viewState.message, Toast.LENGTH_LONG).show()
+                }
+
+                is MainViewState.GetMarkerList -> {
+                    viewState.list.forEach {
+                        it.map = naverMap
+                        it.onClickListener = overlayListener
+                    }
                 }
             }
         }
@@ -127,21 +144,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), 
         // -> onRequestPermissionsResult // 위치 권한 요청
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
         naverMap.locationSource = locationSource
+
         mainViewModel.requestHouseList()
     }
 
-    private fun updateMarker(houses: List<HouseModel>) {
-        houses.forEach { house ->
-            Marker().apply {
-                position = LatLng(house.lat, house.lng)
-                onClickListener = this@MainActivity // 마커 클릭 시 뷰 페이져 연동 되도록 구현
-                map = naverMap
-                tag = house.id
-                icon = MarkerIcons.BLACK
-                iconTintColor = Color.RED
-            }
-        }
-    }
 
     // 위치 퍼미션
     override fun onRequestPermissionsResult(
@@ -162,19 +168,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main), 
             return
         }
 
-    }
-
-    // 마커? 클릭 시 ViewPager 아이템 변경
-    override fun onClick(overly: Overlay): Boolean {
-        val selectedModel = viewPagerAdapter.currentList.firstOrNull {
-            it.id == overly.tag
-        }
-
-        selectedModel?.let {
-            val position = viewPagerAdapter.currentList.indexOf(it)
-            binding.houseViewPager.currentItem = position
-        }
-        return true
     }
 
     override fun onStart() {

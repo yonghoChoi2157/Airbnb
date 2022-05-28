@@ -2,33 +2,18 @@ package fastcampus.aop.part3.chapter07.data.source
 
 import fastcampus.aop.part3.chapter07.api.HouseDto
 import fastcampus.aop.part3.chapter07.api.HouseService
-import fastcampus.aop.part3.chapter07.util.RetrofitClient
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import fastcampus.aop.part3.chapter07.util.Result
 import javax.inject.Inject
 
 
-class HouseRemoteDataSourceImpl @Inject constructor() : HouseRemoteDataSource {
-
-    private val service = RetrofitClient.create<HouseService>(HouseService.baseUrl)
-
-    override fun getHouseList(
-        onSuccess: (HouseDto) -> Unit,
-        onFailure: (String) -> Unit) {
-
-        service.getHouseList().enqueue(
-            object : Callback<HouseDto> {
-                override fun onResponse(call: Call<HouseDto>, response: Response<HouseDto>) {
-                    response.body()?.let(onSuccess)
-                }
-
-                override fun onFailure(call: Call<HouseDto>, t: Throwable) {
-                    onFailure.invoke(t.message ?: "Error")
-                }
-
-            }
-        )
-
+class HouseRemoteDataSourceImpl @Inject constructor(private val houseService: HouseService) :
+    HouseRemoteDataSource {
+    override fun getHouseList(): Result<HouseDto> {
+        return try {
+            val response = houseService.getHouseList().execute().body()!!
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Error(Exception("에러가 발생."))
+        }
     }
 }
