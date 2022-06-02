@@ -30,7 +30,7 @@ class MainViewModel @Inject constructor(private val houseRepository: HouseReposi
             when (val result = houseRepository.getHouseList()) {
                 is Result.Success -> {
                     if (result.data.items.isNotEmpty()) {
-                        onChangeViewState(MainViewState.GetMarkerList(updateMarker(result.data.items)))
+//                        onChangeViewState(MainViewState.GetMarkerList(updateMarker(result.data.items)))
                         onChangeViewState(MainViewState.GetHouseList(result.data))
                     } else {
                         onChangeViewState(MainViewState.Error("데이터가 없습니다."))
